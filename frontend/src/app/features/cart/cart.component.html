@@ -1,0 +1,152 @@
+<div class="container">
+  <header class="page-title">
+    <h1>Votre panier</h1>
+  </header>
+
+  @if (failed()) {
+    <app-error-state title="Le panier n'a pas pu être chargé" (retry)="reload()" />
+  } @else if (cart.cart(); as c) {
+    @if (c.items.length === 0) {
+      <app-empty-state
+        icon="bag"
+        title="Votre panier est vide"
+        message="Laissez-vous inspirer par nos bouquets du jour, ou composez le vôtre fleur par fleur."
+      >
+        <a class="btn" routerLink="/boutique">Découvrir la boutique</a>
+        <a class="btn btn-ghost" routerLink="/creer-mon-bouquet">Créer mon bouquet</a>
+      </app-empty-state>
+    } @else {
+      <div class="layout" [class.busy]="cart.busy()">
+        <section aria-label="Articles du panier">
+          <ul class="lines">
+            @for (line of c.items; track line.id) {
+              <li class="line" [class.issue]="line.issue">
+                <a
+                  class="thumb"
+                  [routerLink]="line.slug ? ['/produit', line.slug] : null"
+                  [attr.tabindex]="line.slug ? null : -1"
+                >
+                  <img
+                    appImgFallback
+                    [src]="line.imageUrl | imgSize: 240"
+                    [alt]="line.name"
+                    width="240"
+                    height="300"
+                    loading="lazy"
+                  />
+                </a>
+                <div class="line-body">
+                  <div class="line-head">
+                    <h2>
+                      @if (line.slug) {
+                        <a [routerLink]="['/produit', line.slug]">{{ line.name }}</a>
+                      } @else {
+                        {{ line.name }}
+                      }
+                    </h2>
+                    <span class="price">{{ line.lineTotal | mad }}</span>
+                  </div>
+                  <p class="unit muted">{{ line.unitPrice | mad }} l'unité</p>
+                  @if (line.bouquet; as b) {
+                    <p class="bouquet muted">
+                      {{ b.stemCount }} tiges :
+                      @for (s of b.stems; track s.name; let last = $last) {
+                        {{ s.quantity }} {{ s.name }}{{ last ? '' : ', ' }}
+                      }
+                      <br />{{ b.wrappingName }}, ruban {{ b.ribbonName }}
+                      @if (b.message) {
+                        <br /><em>« {{ b.message }} »</em>
+                      }
+                    </p>
+                  }
+                  @if (issueText(line); as msg) {
+                    <p class="warn" role="alert">
+                      <app-icon name="alert" [size]="16" /> {{ msg }}
+                      @if (line.issue === 'QUANTITY_EXCEEDS_STOCK') {
+                        <button type="button" class="link-btn" (click)="fix(line)">
+                          Passer à {{ line.maxQuantity }}
+                        </button>
+                      }
+                    </p>
+                  }
+                  <div class="line-actions">
+                    @if (line.issue !== 'UNAVAILABLE' && line.issue !== 'OUT_OF_STOCK') {
+                      <app-quantity-selector
+                        [value]="line.quantity"
+                        (valueChange)="setQuantity(line, $event)"
+                        [min]="1"
+                        [max]="line.maxQuantity > 0 ? line.maxQuantity : line.quantity"
+                        [disabled]="cart.busy()"
+                        [label]="'Quantité de ' + line.name"
+                      />
+                    }
+                    <button type="button" class="link-btn remove" (click)="remove(line)">
+                      <app-icon name="trash" [size]="16" /> Retirer
+                    </button>
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+          <a routerLink="/boutique" class="continue">Continuer mes achats</a>
+        </section>
+
+        <aside class="summary card" aria-labelledby="summary-title">
+          <h2 id="summary-title">Récapitulatif</h2>
+          @if (c.amountToFreeDelivery > 0) {
+            <p class="free">
+              Plus que <strong>{{ c.amountToFreeDelivery | mad }}</strong> pour la livraison
+              offerte.
+            </p>
+            <div class="bar" aria-hidden="true">
+              <span [style.width.%]="(c.subtotal / c.freeDeliveryThreshold) * 100"></span>
+            </div>
+          } @else {
+            <p class="free ok"><app-icon name="check" [size]="18" /> Livraison offerte</p>
+          }
+          <dl>
+            <div>
+              <dt>Sous-total ({{ c.itemCount }} article{{ c.itemCount > 1 ? 's' : '' }})</dt>
+              <dd>{{ c.subtotal | mad }}</dd>
+            </div>
+            <div>
+              <dt>Livraison</dt>
+              <dd>{{ c.deliveryFee > 0 ? (c.deliveryFee | mad) : 'Offerte' }}</dd>
+            </div>
+            @if (c.discount > 0) {
+              <div>
+                <dt>Remise</dt>
+                <dd>− {{ c.discount | mad }}</dd>
+              </div>
+            }
+            <div class="total">
+              <dt>Total</dt>
+              <dd>{{ c.total | mad }}</dd>
+            </div>
+          </dl>
+          <p class="note muted">
+            Paiement à la livraison. L'emballage cadeau et la date se choisissent à l'étape
+            suivante.
+          </p>
+          <button
+            type="button"
+            class="btn btn-block"
+            [disabled]="!c.checkoutReady || cart.busy()"
+            (click)="checkout()"
+          >
+            {{ auth.isLoggedIn() ? 'Passer commande' : 'Se connecter pour commander' }}
+          </button>
+          @if (!c.checkoutReady) {
+            <p class="note warn-text">Corrigez les articles signalés pour continuer.</p>
+          }
+        </aside>
+      </div>
+    }
+  } @else {
+    <div
+      class="skeleton"
+      style="height: 320px; margin-block-end: 80px"
+      aria-label="Chargement du panier"
+    ></div>
+  }
+</div>

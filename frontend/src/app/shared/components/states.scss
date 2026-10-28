@@ -1,0 +1,43 @@
+.state {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: clamp(40px, 7vw, 80px) 24px;
+  border: 1px dashed var(--blush-deep);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+
+  h2 {
+    font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+    margin: 12px 0 4px;
+  }
+
+  p {
+    color: var(--ink-soft);
+    max-width: 46ch;
+  }
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--blush);
+  color: var(--burgundy);
+}
+
+.error .mark {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-block-start: 8px;
+}

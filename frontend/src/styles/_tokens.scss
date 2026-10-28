@@ -1,0 +1,33 @@
+// Bloomé design tokens (Sass side). Runtime values live in CSS custom properties (styles.scss).
+$bp-sm: 600px;
+$bp-md: 900px;
+$bp-lg: 1200px;
+
+@mixin up($bp) {
+  @media (min-width: $bp) {
+    @content;
+  }
+}
+
+@mixin down($bp) {
+  @media (max-width: ($bp - 1px)) {
+    @content;
+  }
+}
+
+// Arched frame: the brand's signature shape (a florist's shop window / vase silhouette).
+@mixin arch($radius: 999px) {
+  border-radius: $radius $radius 18px 18px;
+}
+
+@mixin visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,15 @@
+# Build outputs
+backend/target/
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+# Env & secrets
+.env
+*.env.local
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

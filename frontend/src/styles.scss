@@ -1,0 +1,520 @@
+@use 'tokens' as *;
+@import '@fontsource-variable/fraunces/full.css';
+@import '@fontsource-variable/figtree/index.css';
+
+/* ------------------------------------------------------------------
+   Bloomé — design system
+   Palette (brief): cream, blush, dusty rose, burgundy, sage, ink.
+   Signature: the arched frame. Type: Fraunces (soft axis) + Figtree.
+   Layout uses logical properties so an RTL (Arabic) mode can be added.
+------------------------------------------------------------------- */
+:root {
+  --cream: #fff9f3;
+  --blush: #f6e5e5;
+  --blush-deep: #efd3d4;
+  --rose: #c77983;
+  --rose-ink: #a1505d; /* dusty rose darkened for AA text contrast on cream */
+  --burgundy: #663b45;
+  --burgundy-deep: #4e2b34;
+  --sage: #9aa78d;
+  --sage-ink: #5d6b50; /* sage darkened for text */
+  --sage-soft: #e8ece2;
+  --ink: #302a29;
+  --ink-soft: #6b5f5d;
+  --line: #ead9d6;
+  --white: #ffffff;
+  --danger: #a3343f;
+  --danger-soft: #fbe9ea;
+  --warning: #85540f;
+  --warning-soft: #fbf0dc;
+
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --font-body: 'Figtree Variable', 'Segoe UI', system-ui, sans-serif;
+
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 24px;
+  --shadow-soft: 0 1px 2px rgba(102, 59, 69, 0.06), 0 8px 24px -12px rgba(102, 59, 69, 0.18);
+  --shadow-pop: 0 18px 50px -20px rgba(102, 59, 69, 0.45);
+
+  --gutter: clamp(16px, 4vw, 48px);
+  --max: 1280px;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-feature-settings: 'kern', 'liga';
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 420;
+  font-variation-settings:
+    'SOFT' 100,
+    'WONK' 0;
+  color: var(--burgundy);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5em;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.3rem, 5.2vw, 4.4rem);
+  font-variation-settings:
+    'SOFT' 100,
+    'opsz' 144;
+}
+h2 {
+  font-size: clamp(1.7rem, 3.2vw, 2.6rem);
+  font-variation-settings:
+    'SOFT' 100,
+    'opsz' 96;
+}
+h3 {
+  font-size: clamp(1.2rem, 1.8vw, 1.45rem);
+}
+h4 {
+  font-size: 1.1rem;
+}
+
+p {
+  margin: 0 0 1em;
+  max-width: 68ch;
+}
+
+a {
+  color: var(--burgundy);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+a:hover {
+  color: var(--rose-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--burgundy);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--blush-deep);
+  color: var(--burgundy-deep);
+}
+
+/* ---------- layout helpers ---------- */
+.container {
+  width: 100%;
+  max-width: var(--max);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.section {
+  padding-block: clamp(56px, 8vw, 112px);
+}
+
+.section-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-block-end: clamp(24px, 4vw, 40px);
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+  }
+  p {
+    margin: 6px 0 0;
+    color: var(--ink-soft);
+  }
+}
+
+.lede {
+  font-size: 1.125rem;
+  color: var(--ink-soft);
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+.serif {
+  font-family: var(--font-display);
+}
+.visually-hidden {
+  @include visually-hidden;
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: 16px;
+  inset-block-start: -60px;
+  z-index: 100;
+  background: var(--burgundy);
+  color: var(--white);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  &:focus {
+    inset-block-start: 12px;
+    color: var(--white);
+  }
+}
+
+/* ---------- buttons ---------- */
+.btn {
+  --btn-bg: var(--burgundy);
+  --btn-fg: var(--white);
+  --btn-border: var(--burgundy);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 26px;
+  border-radius: 999px;
+  border: 1.5px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font: 600 0.98rem/1 var(--font-body);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.2s var(--ease),
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease),
+    transform 0.2s var(--ease);
+  white-space: nowrap;
+
+  &:hover {
+    --btn-bg: var(--burgundy-deep);
+    --btn-border: var(--burgundy-deep);
+    color: var(--btn-fg);
+  }
+  &:active {
+    transform: translateY(1px);
+  }
+  &:disabled,
+  &[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+.btn-ghost {
+  --btn-bg: transparent;
+  --btn-fg: var(--burgundy);
+  --btn-border: var(--burgundy);
+  &:hover {
+    --btn-bg: var(--burgundy);
+    --btn-fg: var(--white);
+  }
+}
+
+.btn-soft {
+  --btn-bg: var(--blush);
+  --btn-fg: var(--burgundy);
+  --btn-border: var(--blush);
+  &:hover {
+    --btn-bg: var(--blush-deep);
+    --btn-border: var(--blush-deep);
+    --btn-fg: var(--burgundy);
+  }
+}
+
+.btn-danger {
+  --btn-bg: var(--danger);
+  --btn-border: var(--danger);
+  &:hover {
+    --btn-bg: #85242e;
+    --btn-border: #85242e;
+  }
+}
+
+.btn-sm {
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 0.9rem;
+}
+.btn-block {
+  width: 100%;
+}
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--burgundy);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  &:hover {
+    color: var(--rose-ink);
+  }
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 0;
+  background: transparent;
+  color: var(--burgundy);
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease);
+  &:hover {
+    background: var(--blush);
+  }
+  svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+/* ---------- forms ---------- */
+.field {
+  display: grid;
+  gap: 6px;
+  margin-block-end: 18px;
+
+  label {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--ink);
+  }
+  .hint {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+  .error {
+    font-size: 0.86rem;
+    color: var(--danger);
+  }
+}
+
+.input,
+.select,
+.textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--white);
+  color: var(--ink);
+  font: 400 1rem/1.4 var(--font-body);
+  transition:
+    border-color 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
+
+  &:hover {
+    border-color: var(--blush-deep);
+  }
+  &:focus {
+    outline: none;
+    border-color: var(--burgundy);
+    box-shadow: 0 0 0 3px rgba(199, 121, 131, 0.25);
+  }
+  &.ng-invalid.ng-touched {
+    border-color: var(--danger);
+  }
+  &:disabled {
+    background: var(--blush);
+  }
+}
+
+.textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%23663B45' stroke-width='1.6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-inline-end: 40px;
+}
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  input {
+    accent-color: var(--burgundy);
+    width: 18px;
+    height: 18px;
+    margin-block-start: 3px;
+  }
+}
+
+.form-grid {
+  display: grid;
+  gap: 0 18px;
+  grid-template-columns: 1fr;
+  align-items: start;
+  @include up($bp-sm) {
+    grid-template-columns: 1fr 1fr;
+  }
+  .span-2 {
+    grid-column: 1 / -1;
+  }
+}
+
+.alert {
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  border-inline-start: 3px solid var(--danger);
+  margin-block-end: 18px;
+  &.info {
+    background: var(--sage-soft);
+    color: var(--sage-ink);
+    border-color: var(--sage);
+  }
+  &.warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+    border-color: var(--warning);
+  }
+}
+
+/* ---------- surfaces ---------- */
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(18px, 3vw, 28px);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--blush);
+  color: var(--burgundy);
+  &.sage {
+    background: var(--sage-soft);
+    color: var(--sage-ink);
+  }
+  &.warn {
+    background: var(--warning-soft);
+    color: var(--warning);
+  }
+  &.danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+  &.ink {
+    background: var(--burgundy);
+    color: var(--white);
+  }
+}
+
+.price {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 600;
+  color: var(--burgundy);
+  white-space: nowrap;
+}
+.price-was {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+  font-weight: 400;
+  margin-inline-start: 8px;
+}
+
+.page-title {
+  padding-block: clamp(32px, 5vw, 64px) clamp(16px, 3vw, 32px);
+  h1 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    margin-block-end: 0.25em;
+  }
+}
+
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 12px;
+  list-style: none;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  li:not(:last-child)::after {
+    content: '/';
+    margin-inline-start: 8px;
+    color: var(--line);
+  }
+  a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    &:hover {
+      color: var(--burgundy);
+    }
+  }
+}
+
+/* ---------- skeleton ---------- */
+.skeleton {
+  background: linear-gradient(90deg, var(--blush) 25%, #fbefef 50%, var(--blush) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: var(--radius-sm);
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- motion preferences ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,181 @@
+<div class="container narrow">
+  <header class="page-title">
+    <ol class="breadcrumb" aria-label="Fil d'Ariane">
+      <li><a routerLink="/">Accueil</a></li>
+      <li aria-current="page">{{ title() }}</li>
+    </ol>
+    <h1>{{ title() }}</h1>
+  </header>
+
+  @switch (page()) {
+    @case ('about') {
+      <article class="prose">
+        <div class="hero-img">
+          <img
+            appImgFallback
+            src="https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&fit=crop&w=1400&q=80"
+            alt="Bouquet foisonnant composé dans notre atelier"
+          />
+        </div>
+        <p class="lede">
+          Bloomé est né d'une idée simple : offrir des fleurs devrait être aussi beau à recevoir
+          qu'à commander.
+        </p>
+        <p>
+          Notre atelier, installé à Rabat, compose chaque matin des bouquets avec des fleurs de
+          saison choisies chez des producteurs du Gharb, du Souss et de la région de
+          Rabat-Salé-Kénitra. Nous travaillons en petites quantités pour que chaque tige arrive
+          fraîche, et nous ajustons nos créations au rythme des récoltes.
+        </p>
+        <h2>Ce qui nous guide</h2>
+        <p>
+          Des compositions généreuses mais jamais figées, des emballages recyclables ou
+          réutilisables, et une livraison assurée par notre propre équipe, formée à transporter les
+          fleurs avec soin. Chaque commande est accompagnée d'une carte écrite à la main.
+        </p>
+        <p>
+          Pour les moments qui ne ressemblent à aucun autre, notre atelier « Créer mon bouquet »
+          vous laisse choisir chaque fleur, l'emballage et le ruban.
+        </p>
+        <div class="cta">
+          <a class="btn" routerLink="/boutique">Découvrir la boutique</a>
+          <a class="btn btn-ghost" routerLink="/creer-mon-bouquet">Créer mon bouquet</a>
+        </div>
+      </article>
+    }
+    @case ('delivery') {
+      <article class="prose">
+        @if (delivery(); as d) {
+          <p class="lede">Nous livrons à {{ d.cities.join(', ') }}, du lundi au dimanche.</p>
+          <ul class="facts">
+            <li>
+              <app-icon name="truck" /><span
+                ><strong>{{ d.deliveryFee | mad }}</strong> par livraison, offerte dès
+                {{ d.freeDeliveryThreshold | mad }} d'achat.</span
+              >
+            </li>
+            <li>
+              <app-icon name="clock" /><span
+                >Commandez avant <strong>{{ d.sameDayCutoffHour }}h</strong> pour une livraison le
+                jour même.</span
+              >
+            </li>
+            <li>
+              <app-icon name="gift" /><span
+                >Emballage cadeau premium en option : {{ d.giftWrappingFee | mad }}.</span
+              >
+            </li>
+          </ul>
+          <h2>Créneaux de livraison</h2>
+          <ul>
+            @for (s of d.slots; track s.code) {
+              <li>{{ s.label }}</li>
+            }
+          </ul>
+          <p>Les livraisons peuvent être réservées jusqu'à 30 jours à l'avance.</p>
+        } @else {
+          <div class="skeleton" style="height: 160px"></div>
+        }
+        <h2>Le jour de la livraison</h2>
+        <p>
+          Notre coursier appelle le destinataire avant de passer. En cas d'absence, il dépose le
+          bouquet chez le gardien ou un voisin si vous l'avez indiqué, sinon il vous recontacte pour
+          convenir d'un nouveau passage le jour même.
+        </p>
+      </article>
+    }
+    @case ('contact') {
+      <article class="prose">
+        <p class="lede">
+          Une question sur une commande, un projet d'événement ou un bouquet sur mesure ? Notre
+          équipe vous répond du lundi au samedi, de 9h à 19h.
+        </p>
+        <ul class="facts">
+          <li>
+            <app-icon name="phone" /><span
+              >Téléphone : <a href="tel:+212537000000">05 37 00 00 00</a></span
+            >
+          </li>
+          <li>
+            <app-icon name="whatsapp" /><span
+              >WhatsApp :
+              <a href="https://wa.me/212537000000" target="_blank" rel="noopener noreferrer"
+                >écrire sur WhatsApp</a
+              ></span
+            >
+          </li>
+          <li>
+            <app-icon name="mail" /><span
+              >E-mail : <a href="mailto:bonjour@bloome.ma">bonjour&#64;bloome.ma</a></span
+            >
+          </li>
+          <li>
+            <app-icon name="pin" /><span>Atelier : 14 avenue Fal Ould Oumeir, Agdal, Rabat</span>
+          </li>
+        </ul>
+        <p>
+          Pour une commande existante, indiquez sa référence (par exemple BLM-261027-K7Q4X) : vous
+          la trouverez dans <a routerLink="/compte/commandes">vos commandes</a>.
+        </p>
+      </article>
+    }
+    @case ('faq') {
+      <div class="faq">
+        @for (item of faq; track item.q) {
+          <details>
+            <summary>{{ item.q }}</summary>
+            <p>{{ item.a }}</p>
+          </details>
+        }
+      </div>
+    }
+    @case ('terms') {
+      <article class="prose">
+        <p class="muted">
+          Document de démonstration à faire valider juridiquement avant toute mise en production.
+        </p>
+        <h2>Commandes</h2>
+        <p>
+          Les prix sont affichés en dirhams marocains (MAD), toutes taxes comprises. Le montant
+          définitif est calculé par notre boutique au moment de la validation et affiché avant
+          confirmation.
+        </p>
+        <h2>Paiement</h2>
+        <p>Le paiement s'effectue à la livraison, en espèces, auprès du coursier.</p>
+        <h2>Annulation</h2>
+        <p>
+          Une commande peut être annulée sans frais depuis l'espace client tant qu'elle n'est pas en
+          préparation.
+        </p>
+        <h2>Produits frais</h2>
+        <p>
+          Les fleurs étant des produits périssables, une fleur indisponible peut être remplacée par
+          une variété de même couleur et de valeur égale ou supérieure.
+        </p>
+      </article>
+    }
+    @case ('privacy') {
+      <article class="prose">
+        <p class="muted">
+          Document de démonstration à faire valider juridiquement (loi 09-08) avant toute mise en
+          production.
+        </p>
+        <h2>Données collectées</h2>
+        <p>
+          Nom, e-mail, téléphone et adresses de livraison, uniquement pour traiter vos commandes et
+          gérer votre compte. Les mots de passe sont stockés sous forme chiffrée et irréversible.
+        </p>
+        <h2>Cookies</h2>
+        <p>
+          Nous utilisons uniquement des cookies techniques : un cookie de session (connexion) et un
+          jeton de sécurité contre les requêtes frauduleuses. Aucun cookie publicitaire.
+        </p>
+        <h2>Vos droits</h2>
+        <p>
+          Vous pouvez demander l'accès, la rectification ou la suppression de vos données en
+          écrivant à <a href="mailto:bonjour@bloome.ma">bonjour&#64;bloome.ma</a>.
+        </p>
+      </article>
+    }
+  }
+</div>

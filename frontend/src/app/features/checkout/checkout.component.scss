@@ -1,0 +1,146 @@
+@use 'tokens' as *;
+
+.layout {
+  display: grid;
+  gap: 28px;
+  padding-block-end: 96px;
+  @include up($bp-md) {
+    grid-template-columns: 1fr 380px;
+    align-items: start;
+  }
+}
+
+.sections {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+  h2 {
+    font-size: 1.45rem;
+    margin-block-end: 18px;
+  }
+}
+
+.someone {
+  margin-block-end: 18px;
+}
+
+.slots {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr));
+  legend {
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin-block-end: 8px;
+  }
+}
+
+.slot {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  cursor: pointer;
+  input {
+    accent-color: var(--burgundy);
+    margin-block-start: 4px;
+  }
+  &.selected {
+    border-color: var(--burgundy);
+    background: var(--blush);
+  }
+  &.pay {
+    cursor: default;
+  }
+}
+
+.gift-msg {
+  margin-block-start: 18px;
+}
+
+.summary {
+  @include up($bp-md) {
+    position: sticky;
+    top: 96px;
+  }
+  h2 {
+    font-size: 1.5rem;
+  }
+  dl {
+    margin: 16px 0;
+  }
+  dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding-block: 6px;
+  }
+  dt {
+    color: var(--ink-soft);
+  }
+  dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  .total {
+    border-block-start: 1px solid var(--line);
+    margin-block-start: 8px;
+    padding-block-start: 12px;
+    font-weight: 700;
+    font-size: 1.15rem;
+  }
+  .total dt {
+    color: var(--ink);
+  }
+  .total dd {
+    color: var(--burgundy);
+  }
+}
+
+.mini {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+  max-height: 280px;
+  overflow-y: auto;
+  li {
+    display: grid;
+    grid-template-columns: 44px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.92rem;
+  }
+  img {
+    width: 44px;
+    height: 55px;
+    object-fit: cover;
+    border-radius: 999px 999px 6px 6px;
+    background: var(--blush);
+  }
+}
+
+.when {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  text-transform: none;
+}
+.small {
+  font-size: 0.84rem;
+  margin: 12px 0 0;
+}
+.warn {
+  color: var(--warning);
+}
+.alert .small {
+  font-size: 0.86rem;
+}

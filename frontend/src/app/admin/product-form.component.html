@@ -1,0 +1,338 @@
+<a routerLink="/admin/produits" class="back">Tous les produits</a>
+<div class="head">
+  <div>
+    <h1>{{ product() ? product()!.name : 'Nouveau produit' }}</h1>
+    @if (product(); as p) {
+      <p>
+        {{ p.salesCount }} vendus ·
+        <a [routerLink]="['/produit', p.slug]" target="_blank" rel="noopener">voir en boutique</a>
+      </p>
+    }
+  </div>
+</div>
+
+@if (error()) {
+  <p class="alert" role="alert">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <div class="skeleton" style="height: 480px"></div>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="save()" class="grid" novalidate>
+    <div class="col">
+      <section class="card">
+        <h2>Informations</h2>
+        <div class="field">
+          <label for="name">Nom</label>
+          <input id="name" class="input" formControlName="name" />
+          @if (invalid('name'); as m) {
+            <span class="error">{{ m }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="slug">Slug (adresse de la page)</label>
+          <input
+            id="slug"
+            class="input"
+            formControlName="slug"
+            placeholder="généré à partir du nom si vide"
+          />
+          @if (invalid('slug'); as m) {
+            <span class="error">{{ m }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="shortDescription">Description courte</label>
+          <input
+            id="shortDescription"
+            class="input"
+            formControlName="shortDescription"
+            maxlength="300"
+          />
+          @if (invalid('shortDescription'); as m) {
+            <span class="error">{{ m }}</span>
+          }
+        </div>
+        <div class="field">
+          <label for="description">Description complète</label>
+          <textarea
+            id="description"
+            class="textarea"
+            formControlName="description"
+            rows="5"
+          ></textarea>
+          @if (invalid('description'); as m) {
+            <span class="error">{{ m }}</span>
+          }
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="composition">Composition</label>
+            <textarea id="composition" class="textarea" formControlName="composition"></textarea>
+          </div>
+          <div class="field">
+            <label for="care">Conseils d'entretien</label>
+            <textarea id="care" class="textarea" formControlName="careInstructions"></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Photos</h2>
+        <p class="muted small">
+          Les images sont référencées par URL (https:// ou /assets/). La première est l'image
+          principale.
+        </p>
+        <div formArrayName="images" class="images">
+          @for (img of images.controls; track img; let i = $index) {
+            <div class="image-row" [formGroupName]="i">
+              <img
+                appImgFallback
+                [src]="img.controls.url.value | imgSize: 160"
+                alt=""
+                class="preview"
+              />
+              <div class="image-fields">
+                <label class="visually-hidden" [for]="'img-url-' + i"
+                  >URL de l'image {{ i + 1 }}</label
+                >
+                <input
+                  class="input"
+                  [id]="'img-url-' + i"
+                  formControlName="url"
+                  placeholder="https://images.unsplash.com/…"
+                />
+                <label class="visually-hidden" [for]="'img-alt-' + i"
+                  >Texte alternatif {{ i + 1 }}</label
+                >
+                <input
+                  class="input"
+                  [id]="'img-alt-' + i"
+                  formControlName="altText"
+                  placeholder="Texte alternatif (accessibilité)"
+                />
+                @if (img.controls.url.touched && img.controls.url.invalid) {
+                  <span class="error">URL requise, commençant par https:// ou /assets/.</span>
+                }
+              </div>
+              <div class="image-actions">
+                <button
+                  type="button"
+                  class="icon-btn"
+                  (click)="moveImage(i, -1)"
+                  [disabled]="i === 0"
+                  aria-label="Monter l'image"
+                >
+                  <app-icon name="chevronLeft" [size]="18" />
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  (click)="moveImage(i, 1)"
+                  [disabled]="i === images.length - 1"
+                  aria-label="Descendre l'image"
+                >
+                  <app-icon name="chevronRight" [size]="18" />
+                </button>
+                <button
+                  type="button"
+                  class="icon-btn"
+                  (click)="removeImage(i)"
+                  aria-label="Retirer l'image"
+                >
+                  <app-icon name="trash" [size]="18" />
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+        <button
+          type="button"
+          class="btn btn-soft btn-sm"
+          (click)="addImage()"
+          [disabled]="images.length >= 10"
+        >
+          Ajouter une photo
+        </button>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card">
+        <h2>Prix et stock</h2>
+        <div class="form-grid">
+          <div class="field">
+            <label for="price">Prix (MAD)</label>
+            <input
+              id="price"
+              class="input"
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="price"
+            />
+            @if (invalid('price'); as m) {
+              <span class="error">{{ m }}</span>
+            }
+          </div>
+          <div class="field">
+            <label for="compare">Prix barré (MAD)</label>
+            <input
+              id="compare"
+              class="input"
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="compareAtPrice"
+            />
+            @if (invalid('compareAtPrice'); as m) {
+              <span class="error">{{ m }}</span>
+            }
+          </div>
+          <div class="field">
+            <label for="stock">Stock</label>
+            <input
+              id="stock"
+              class="input"
+              type="number"
+              min="0"
+              step="1"
+              formControlName="stockQuantity"
+            />
+            @if (invalid('stockQuantity'); as m) {
+              <span class="error">{{ m }}</span>
+            }
+          </div>
+          <div class="field">
+            <label for="low">Seuil de stock bas</label>
+            <input
+              id="low"
+              class="input"
+              type="number"
+              min="0"
+              step="1"
+              formControlName="lowStockThreshold"
+            />
+          </div>
+          <div class="field">
+            <label for="max">Maximum par commande</label>
+            <input
+              id="max"
+              class="input"
+              type="number"
+              min="1"
+              max="100"
+              step="1"
+              formControlName="maxPerOrder"
+            />
+            @if (invalid('maxPerOrder'); as m) {
+              <span class="error">{{ m }}</span>
+            }
+          </div>
+        </div>
+        @if (product()) {
+          <div class="adjust">
+            <label for="delta">Ajustement rapide du stock</label>
+            <div class="row">
+              <input
+                id="delta"
+                class="input"
+                type="number"
+                step="1"
+                [value]="stockDelta()"
+                (input)="setDelta($event)"
+                placeholder="+10 ou -2"
+              />
+              <button
+                type="button"
+                class="btn btn-soft btn-sm"
+                (click)="adjustStock()"
+                [disabled]="!stockDelta()"
+              >
+                Appliquer
+              </button>
+            </div>
+            <span class="hint"
+              >Appliqué immédiatement et de façon atomique, même si des commandes arrivent en
+              parallèle.</span
+            >
+          </div>
+        }
+      </section>
+
+      <section class="card">
+        <h2>Classement</h2>
+        <div class="field">
+          <label for="category">Catégorie</label>
+          <select id="category" class="select" formControlName="categoryId">
+            <option [ngValue]="null" disabled>Choisir…</option>
+            @for (c of categories(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }}</option>
+            }
+          </select>
+          @if (invalid('categoryId'); as m) {
+            <span class="error">{{ m }}</span>
+          }
+        </div>
+        <fieldset>
+          <legend>Couleurs</legend>
+          <div class="chips">
+            @for (c of colors; track c) {
+              <label class="chip" [class.on]="form.controls.colors.value.includes(c)">
+                <input
+                  type="checkbox"
+                  class="visually-hidden"
+                  [checked]="form.controls.colors.value.includes(c)"
+                  (change)="toggleList(form.controls.colors, c)"
+                />
+                <span class="dot" [style.background]="swatches[c]"></span>{{ colorLabels[c] }}
+              </label>
+            }
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Occasions</legend>
+          <div class="chips">
+            @for (o of occasions(); track o.id) {
+              <label class="chip" [class.on]="form.controls.occasionIds.value.includes(o.id)">
+                <input
+                  type="checkbox"
+                  class="visually-hidden"
+                  [checked]="form.controls.occasionIds.value.includes(o.id)"
+                  (change)="toggleList(form.controls.occasionIds, o.id)"
+                />
+                {{ o.name }}
+              </label>
+            }
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Visibilité</legend>
+          <label class="check"
+            ><input type="checkbox" formControlName="active" />
+            <span>Actif (visible et commandable en boutique)</span></label
+          >
+          <label class="check"
+            ><input type="checkbox" formControlName="featured" /> <span>Mis en avant</span></label
+          >
+          <label class="check"
+            ><input type="checkbox" formControlName="bestseller" />
+            <span>Meilleure vente</span></label
+          >
+        </fieldset>
+      </section>
+
+      <div class="save">
+        <button type="submit" class="btn btn-block" [disabled]="saving()">
+          {{
+            saving()
+              ? 'Enregistrement…'
+              : product()
+                ? 'Enregistrer les modifications'
+                : 'Créer le produit'
+          }}
+        </button>
+      </div>
+    </div>
+  </form>
+}

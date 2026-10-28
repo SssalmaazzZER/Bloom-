@@ -1,0 +1,146 @@
+.back {
+  display: inline-block;
+  margin-block-end: 12px;
+  font-size: 0.9rem;
+}
+.small {
+  font-size: 0.86rem;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+  @media (min-width: 1100px) {
+    grid-template-columns: 1.4fr 1fr;
+    align-items: start;
+  }
+}
+
+.col {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+.card h2 {
+  font-size: 1.25rem;
+  margin-block-end: 16px;
+}
+
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0 0 16px;
+  legend {
+    font-weight: 600;
+    font-size: 0.92rem;
+    margin-block-end: 8px;
+  }
+  .check {
+    padding-block: 4px;
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-size: 0.88rem;
+  cursor: pointer;
+  &.on {
+    border-color: var(--burgundy);
+    background: var(--blush);
+    color: var(--burgundy);
+    font-weight: 600;
+  }
+  &:focus-within {
+    outline: 2px solid var(--burgundy);
+    outline-offset: 1px;
+  }
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(48, 42, 41, 0.15);
+}
+
+.images {
+  display: grid;
+  gap: 12px;
+  margin-block-end: 14px;
+}
+
+.image-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 12px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.preview {
+  width: 56px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 999px 999px 6px 6px;
+  background: var(--blush);
+}
+.image-fields {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  .input {
+    min-height: 40px;
+    padding-block: 8px;
+  }
+}
+.image-actions {
+  display: flex;
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .icon-btn:disabled {
+    opacity: 0.3;
+  }
+}
+
+.adjust {
+  border-block-start: 1px solid var(--line);
+  padding-block-start: 16px;
+  display: grid;
+  gap: 6px;
+  label {
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .row {
+    display: flex;
+    gap: 8px;
+    .input {
+      max-width: 160px;
+    }
+  }
+  .hint {
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+}
+
+.save {
+  position: sticky;
+  bottom: 16px;
+}

@@ -1,0 +1,367 @@
+<div class="container">
+  @switch (status()) {
+    @case ('loading') {
+      <div class="layout" aria-busy="true" aria-label="Chargement du produit">
+        <div class="skeleton gallery-sk"></div>
+        <div>
+          <div class="skeleton" style="height: 18px; width: 30%; margin-block: 40px 16px"></div>
+          <div class="skeleton" style="height: 48px; width: 70%"></div>
+          <div class="skeleton" style="height: 120px; margin-top: 24px"></div>
+        </div>
+      </div>
+    }
+    @case ('notfound') {
+      <div class="section">
+        <app-empty-state
+          icon="leaf"
+          title="Cette création n'est plus proposée"
+          message="Elle a peut-être fané… Découvrez nos autres bouquets du moment."
+        >
+          <a class="btn" routerLink="/boutique">Retour à la boutique</a>
+        </app-empty-state>
+      </div>
+    }
+    @case ('error') {
+      <div class="section"><app-error-state (retry)="load(slug())" /></div>
+    }
+    @case ('ready') {
+      @if (product(); as p) {
+        <nav class="crumbs">
+          <ol class="breadcrumb" aria-label="Fil d'Ariane">
+            <li><a routerLink="/">Accueil</a></li>
+            <li>
+              <a routerLink="/boutique" [queryParams]="{ categorie: p.category.slug }">{{
+                p.category.name
+              }}</a>
+            </li>
+            <li aria-current="page">{{ p.name }}</li>
+          </ol>
+        </nav>
+
+        <div class="layout">
+          <!-- Gallery -->
+          <div class="gallery">
+            <div class="main-img">
+              @if (p.images.length) {
+                <img
+                  appImgFallback
+                  [src]="p.images[activeImage()].url | imgSize: 1200"
+                  [alt]="p.images[activeImage()].altText || p.name"
+                  width="1200"
+                  height="1500"
+                />
+              } @else {
+                <img appImgFallback src="" [alt]="p.name" />
+              }
+              @if (!p.inStock) {
+                <span class="flag badge danger">Épuisé</span>
+              }
+            </div>
+            @if (p.images.length > 1) {
+              <div class="thumbs" role="group" aria-label="Photos du produit">
+                @for (img of p.images; track img.url; let i = $index) {
+                  <button
+                    type="button"
+                    class="thumb"
+                    [class.active]="i === activeImage()"
+                    (click)="activeImage.set(i)"
+                    [attr.aria-label]="'Afficher la photo ' + (i + 1) + ' sur ' + p.images.length"
+                    [attr.aria-pressed]="i === activeImage()"
+                  >
+                    <img
+                      appImgFallback
+                      [src]="img.url | imgSize: 200"
+                      alt=""
+                      width="200"
+                      height="250"
+                      loading="lazy"
+                    />
+                  </button>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Buy box -->
+          <div class="info">
+            <p class="cat">{{ p.category.name }}</p>
+            <h1>{{ p.name }}</h1>
+            @if (p.ratingCount > 0) {
+              <a class="rating-link" href="#avis">
+                <app-rating [value]="p.ratingAverage" />
+                <span
+                  >{{ p.ratingAverage }}/5, {{ p.ratingCount }} avis vérifié{{
+                    p.ratingCount > 1 ? 's' : ''
+                  }}</span
+                >
+              </a>
+            }
+            <p class="price big">
+              {{ p.price | mad }}
+              @if (p.compareAtPrice) {
+                <span class="price-was"
+                  ><span class="visually-hidden">au lieu de </span
+                  >{{ p.compareAtPrice | mad }}</span
+                >
+              }
+            </p>
+            <p class="lede">{{ p.shortDescription }}</p>
+
+            <p class="stock" [class.low]="p.lowStock" [class.out]="!p.inStock" role="status">
+              @if (!p.inStock) {
+                <app-icon name="alert" [size]="18" /> Épuisé pour le moment
+              } @else if (p.lowStock) {
+                <app-icon name="alert" [size]="18" /> Plus que
+                {{ p.availableQuantity }} disponible{{ p.availableQuantity > 1 ? 's' : '' }}
+              } @else {
+                <app-icon name="check" [size]="18" /> En stock, composé le jour de la livraison
+              }
+            </p>
+
+            @if (p.colors.length) {
+              <div class="colors">
+                <span class="label">Couleurs</span>
+                @for (c of p.colors; track c) {
+                  <span class="color"
+                    ><span class="dot" [style.background]="swatches[c]"></span
+                    >{{ colorLabels[c] }}</span
+                  >
+                }
+              </div>
+            }
+
+            <div class="buy">
+              <app-quantity-selector
+                [(value)]="quantity"
+                [min]="1"
+                [max]="p.availableQuantity || 1"
+                [disabled]="!p.inStock"
+                label="Quantité"
+              />
+              <button
+                type="button"
+                class="btn add"
+                [disabled]="!p.inStock || adding()"
+                (click)="addToCart()"
+              >
+                {{ p.inStock ? (adding() ? 'Ajout…' : 'Ajouter au panier') : 'Épuisé' }}
+              </button>
+              @if (auth.isLoggedIn()) {
+                <button
+                  type="button"
+                  class="icon-btn wish"
+                  [class.on]="wished()"
+                  (click)="toggleWish()"
+                  [attr.aria-pressed]="wished()"
+                  [attr.aria-label]="wished() ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+                >
+                  <app-icon name="heart" />
+                </button>
+              } @else {
+                <a
+                  class="icon-btn wish"
+                  routerLink="/connexion"
+                  [queryParams]="{ returnUrl: '/produit/' + p.slug }"
+                  aria-label="Se connecter pour ajouter aux favoris"
+                  ><app-icon name="heart"
+                /></a>
+              }
+            </div>
+            @if (p.inStock && p.availableQuantity > 0) {
+              <p class="hint muted">Maximum {{ p.availableQuantity }} par commande.</p>
+            }
+
+            <div class="delivery">
+              <app-icon name="truck" />
+              <div>
+                <strong>{{ p.deliveryEstimate.message }}</strong>
+                <p>
+                  Première date disponible :
+                  {{ p.deliveryEstimate.earliestDate | date: 'EEEE d MMMM' }}. Livraison
+                  {{ p.deliveryEstimate.deliveryFee | mad }}, offerte dès
+                  {{ p.deliveryEstimate.freeDeliveryThreshold | mad }}.
+                </p>
+              </div>
+            </div>
+
+            <div class="details">
+              <details open>
+                <summary>Description</summary>
+                <p>{{ p.description }}</p>
+              </details>
+              @if (p.composition) {
+                <details>
+                  <summary>Composition</summary>
+                  <p>{{ p.composition }}</p>
+                </details>
+              }
+              @if (p.careInstructions) {
+                <details>
+                  <summary>Entretien</summary>
+                  <p>{{ p.careInstructions }}</p>
+                </details>
+              }
+              @if (p.occasions.length) {
+                <details>
+                  <summary>Idéal pour</summary>
+                  <p class="occasions">
+                    @for (o of p.occasions; track o.id) {
+                      <a
+                        class="badge sage"
+                        routerLink="/boutique"
+                        [queryParams]="{ occasion: o.slug }"
+                        >{{ o.name }}</a
+                      >
+                    }
+                  </p>
+                </details>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Reviews -->
+        <section id="avis" class="section reviews" aria-labelledby="reviews-title">
+          <div class="section-head">
+            <div>
+              <h2 id="reviews-title">Avis clients</h2>
+              <p>Seuls les clients ayant reçu ce produit peuvent laisser un avis.</p>
+            </div>
+          </div>
+          @if (reviews(); as r) {
+            <div class="reviews-layout">
+              <div class="summary card">
+                @if (r.count > 0) {
+                  <p class="avg serif">{{ r.average }}<span>/5</span></p>
+                  <app-rating [value]="r.average" />
+                  <p class="muted">{{ r.count }} avis vérifié{{ r.count > 1 ? 's' : '' }}</p>
+                } @else {
+                  <p class="muted">Aucun avis pour l'instant.</p>
+                }
+
+                @if (r.canReview) {
+                  <form
+                    [formGroup]="reviewForm"
+                    (ngSubmit)="submitReview()"
+                    class="review-form"
+                    novalidate
+                  >
+                    <h3>Donner mon avis</h3>
+                    @if (reviewError()) {
+                      <p class="alert" role="alert">{{ reviewError() }}</p>
+                    }
+                    <fieldset class="stars-input">
+                      <legend>Note</legend>
+                      @for (n of [1, 2, 3, 4, 5]; track n) {
+                        <label>
+                          <input
+                            type="radio"
+                            formControlName="rating"
+                            [value]="n"
+                            class="visually-hidden"
+                          />
+                          <span
+                            [class.on]="reviewForm.controls.rating.value >= n"
+                            aria-hidden="true"
+                            >★</span
+                          >
+                          <span class="visually-hidden">{{ n }} étoile{{ n > 1 ? 's' : '' }}</span>
+                        </label>
+                      }
+                    </fieldset>
+                    <div class="field">
+                      <label for="rv-title">Titre (facultatif)</label>
+                      <input id="rv-title" class="input" formControlName="title" maxlength="120" />
+                    </div>
+                    <div class="field">
+                      <label for="rv-comment">Votre avis</label>
+                      <textarea
+                        id="rv-comment"
+                        class="textarea"
+                        formControlName="comment"
+                        maxlength="2000"
+                      ></textarea>
+                      @if (
+                        reviewForm.controls.comment.touched && reviewForm.controls.comment.invalid
+                      ) {
+                        <span class="error">Votre avis doit contenir au moins 10 caractères.</span>
+                      }
+                    </div>
+                    <button type="submit" class="btn btn-block" [disabled]="reviewSending()">
+                      Publier mon avis
+                    </button>
+                  </form>
+                } @else if (r.alreadyReviewed) {
+                  <p class="alert info">Merci, vous avez déjà donné votre avis sur ce produit.</p>
+                } @else if (!auth.isLoggedIn()) {
+                  <p class="muted small">
+                    Vous avez reçu ce produit ?
+                    <a routerLink="/connexion" [queryParams]="{ returnUrl: '/produit/' + p.slug }"
+                      >Connectez-vous</a
+                    >
+                    pour donner votre avis.
+                  </p>
+                }
+              </div>
+
+              <div class="review-list">
+                @for (rv of r.reviews.content; track rv.id) {
+                  <article class="review">
+                    <header>
+                      <app-rating [value]="rv.rating" />
+                      @if (rv.title) {
+                        <h3>{{ rv.title }}</h3>
+                      }
+                    </header>
+                    <p>{{ rv.comment }}</p>
+                    <footer class="muted">
+                      {{ rv.authorName }}, le {{ rv.createdAt | date: 'd MMMM y' }}
+                      <span class="badge sage"
+                        ><app-icon name="check" [size]="14" /> Achat vérifié</span
+                      >
+                    </footer>
+                  </article>
+                } @empty {
+                  <p class="muted">Soyez la première personne à partager son expérience.</p>
+                }
+                @if (r.reviews.totalPages > 1) {
+                  <div class="more">
+                    @if (!r.reviews.first) {
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        (click)="loadReviews(r.reviews.page - 1)"
+                      >
+                        Avis précédents
+                      </button>
+                    }
+                    @if (!r.reviews.last) {
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-sm"
+                        (click)="loadReviews(r.reviews.page + 1)"
+                      >
+                        Avis suivants
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </section>
+
+        @if (related().length) {
+          <section class="section related" aria-labelledby="related-title">
+            <div class="section-head"><h2 id="related-title">Vous aimerez aussi</h2></div>
+            <div class="grid">
+              @for (r of related(); track r.id) {
+                <app-product-card [product]="r" />
+              }
+            </div>
+          </section>
+        }
+      }
+    }
+  }
+</div>

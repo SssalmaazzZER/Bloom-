@@ -1,0 +1,25 @@
+# Integration tests run against a real PostgreSQL database (default: bloome_test on localhost).
+# Override with TEST_DB_URL / TEST_DB_USERNAME / TEST_DB_PASSWORD. The schema is cleaned and
+# re-migrated (including the demo catalog) once per test run.
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/bloome_test}
+    username: ${TEST_DB_USERNAME:bloome}
+    password: ${TEST_DB_PASSWORD:bloome_dev}
+  flyway:
+    clean-disabled: false
+    locations: classpath:db/migration,classpath:db/seed
+
+bloome:
+  bootstrap:
+    admin-email: ""
+    admin-password: ""
+    demo-accounts: false
+  rate-limit:
+    auth-requests-per-minute: 1000
+
+logging:
+  level:
+    ma.bloome: WARN
+    org.springframework: WARN
+    org.hibernate: WARN

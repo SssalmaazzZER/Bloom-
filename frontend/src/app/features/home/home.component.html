@@ -1,0 +1,242 @@
+<!-- Hero -->
+<section class="hero container" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <h1 id="hero-title">Des fleurs cueillies ce matin, chez vous ce soir.</h1>
+    <p class="lede">
+      Nos fleuristes composent chaque bouquet à la main avec des fleurs de saison choisies chez des
+      producteurs marocains, puis nos coursiers les livrent avec le même soin.
+    </p>
+    <div class="cta">
+      <a class="btn" routerLink="/boutique">Découvrir la boutique</a>
+      <a class="btn btn-ghost" routerLink="/creer-mon-bouquet">Créer mon bouquet</a>
+    </div>
+    <ul class="promises">
+      <li>
+        <app-icon name="truck" [size]="20" />
+        @if (delivery(); as d) {
+          Commandez avant {{ d.sameDayCutoffHour }}h, livré aujourd'hui
+        } @else {
+          Livraison le jour même
+        }
+      </li>
+      <li><app-icon name="leaf" [size]="20" /> Fraîcheur garantie 7 jours</li>
+      <li><app-icon name="gift" [size]="20" /> Carte manuscrite offerte</li>
+    </ul>
+  </div>
+  <div class="hero-visual">
+    <div class="arch">
+      <img
+        appImgFallback
+        [src]="heroImage"
+        alt="Bouquet foisonnant de roses de jardin et feuillages, composé à la main"
+        width="1400"
+        height="1750"
+        fetchpriority="high"
+      />
+    </div>
+    <div class="inset">
+      <img
+        appImgFallback
+        [src]="heroInset"
+        alt="Bouquet emballé de kraft tendu par une main"
+        width="500"
+        height="500"
+        loading="lazy"
+      />
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="section categories" aria-labelledby="cat-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2 id="cat-title">Par où commencer ?</h2>
+        <p>Bouquets du jour, roses, fleurs de saison, plantes et coffrets.</p>
+      </div>
+      <a routerLink="/boutique" class="btn btn-soft btn-sm">Tout voir</a>
+    </div>
+    <ul class="cat-row">
+      @for (c of categories(); track c.id) {
+        <li>
+          <a class="cat" routerLink="/boutique" [queryParams]="{ categorie: c.slug }">
+            <span class="cat-img">
+              <img
+                appImgFallback
+                [src]="c.imageUrl | imgSize: 600"
+                [alt]="''"
+                loading="lazy"
+                width="600"
+                height="760"
+              />
+            </span>
+            <span class="cat-name">{{ c.name }}</span>
+            <span class="cat-count">{{ c.productCount }} créations</span>
+          </a>
+        </li>
+      } @empty {
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <li>
+            <div class="cat"><span class="cat-img skeleton"></span></div>
+          </li>
+        }
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Bestsellers -->
+<section class="section bestsellers" aria-labelledby="best-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2 id="best-title">Les plus offerts</h2>
+        <p>Les compositions que nos clients choisissent le plus souvent.</p>
+      </div>
+      <a routerLink="/boutique" [queryParams]="{ tri: 'POPULARITY' }" class="btn btn-soft btn-sm"
+        >Voir les meilleures ventes</a
+      >
+    </div>
+    @if (bestsellersError()) {
+      <app-error-state
+        title="Les meilleures ventes ne sont pas disponibles"
+        (retry)="loadBestsellers()"
+      />
+    } @else if (bestsellers(); as items) {
+      <div class="grid">
+        @for (p of items; track p.id) {
+          <app-product-card [product]="p" />
+        }
+      </div>
+    } @else {
+      <app-product-grid-skeleton [count]="4" />
+    }
+  </div>
+</section>
+
+<!-- Seasonal banner -->
+<section class="season" aria-labelledby="season-title">
+  <div class="container season-inner">
+    <div class="season-img">
+      <img
+        appImgFallback
+        [src]="seasonImage"
+        alt="Dahlia rose poudré aux pétales géométriques"
+        loading="lazy"
+        width="1200"
+        height="1200"
+      />
+    </div>
+    <div class="season-copy">
+      <h2 id="season-title">La collection d'automne est arrivée</h2>
+      <p>
+        Dahlias café au lait, cosmos, hortensias bleu nuit : la saison offre ses plus belles
+        couleurs. Des compositions disponibles tant que dure la récolte.
+      </p>
+      <a class="btn btn-soft" routerLink="/boutique" [queryParams]="{ categorie: 'saison' }"
+        >Voir les fleurs de saison</a
+      >
+    </div>
+  </div>
+</section>
+
+<!-- Occasions -->
+<section class="section occasions" aria-labelledby="occ-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2 id="occ-title">Des fleurs pour chaque moment</h2>
+        <p>Anniversaires, amour, célébrations ou condoléances : trouvez les mots justes.</p>
+      </div>
+    </div>
+    <ul class="occ-grid">
+      @for (o of occasions(); track o.id) {
+        <li>
+          <a class="occ" routerLink="/boutique" [queryParams]="{ occasion: o.slug }">
+            <img
+              appImgFallback
+              [src]="o.imageUrl | imgSize: 500"
+              alt=""
+              loading="lazy"
+              width="500"
+              height="500"
+            />
+            <span class="occ-text">
+              <span class="occ-name">{{ o.name }}</span>
+              <span class="occ-desc">{{ o.description }}</span>
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<!-- Brand story -->
+<section class="section story" aria-labelledby="story-title">
+  <div class="container story-inner">
+    <div class="story-img">
+      <img
+        appImgFallback
+        [src]="storyImage"
+        alt="Bouquet pastel dans un bocal en verre posé sur une table"
+        loading="lazy"
+        width="1000"
+        height="1250"
+      />
+    </div>
+    <div class="story-copy">
+      <h2 id="story-title">La philosophie Bloomé</h2>
+      <p class="lede">
+        Nous croyons qu'un bouquet doit ressembler à la saison et à la personne qui le reçoit. Pas
+        de fleurs fatiguées en chambre froide depuis des semaines : nous achetons peu, souvent, et
+        près d'ici.
+      </p>
+      <dl class="values">
+        <div>
+          <dt>Cueilli près d'ici</dt>
+          <dd>
+            La majorité de nos fleurs viennent de producteurs de la région de Rabat-Salé-Kénitra et
+            du Souss.
+          </dd>
+        </div>
+        <div>
+          <dt>Composé le matin même</dt>
+          <dd>Chaque bouquet est assemblé à la main le jour de sa livraison, jamais à l'avance.</dd>
+        </div>
+        <div>
+          <dt>Livré par nos coursiers</dt>
+          <dd>
+            Une équipe formée à transporter les fleurs, avec un emballage recyclable et une réserve
+            d'eau.
+          </dd>
+        </div>
+      </dl>
+      <a routerLink="/a-propos" class="btn btn-ghost">Notre histoire</a>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section testimonials" aria-labelledby="testi-title">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <h2 id="testi-title">Ils ont offert des fleurs</h2>
+        <p>
+          <span class="badge">Contenu de démonstration</span>
+          Témoignages d'illustration, distincts des avis vérifiés affichés sur les fiches produits.
+        </p>
+      </div>
+    </div>
+    <div class="quotes">
+      @for (t of testimonials; track t.author) {
+        <figure class="quote">
+          <blockquote>{{ t.quote }}</blockquote>
+          <figcaption>{{ t.author }}, {{ t.city }}</figcaption>
+        </figure>
+      }
+    </div>
+  </div>
+</section>

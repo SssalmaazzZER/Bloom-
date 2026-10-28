@@ -1,0 +1,114 @@
+/* Shared admin page styles (tables, toolbars, headers). */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-block-end: 22px;
+  h1 {
+    font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+    margin: 0;
+  }
+  p {
+    margin: 4px 0 0;
+    color: var(--ink-soft);
+  }
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+  margin-block-end: 18px;
+  .input,
+  .select {
+    min-height: 42px;
+    padding-block: 8px;
+  }
+  label {
+    display: grid;
+    gap: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  th,
+  td {
+    padding: 12px 14px;
+    text-align: start;
+    border-block-end: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  th {
+    font-weight: 600;
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    background: #fdf8f5;
+    white-space: nowrap;
+  }
+  tr:last-child td {
+    border-block-end: 0;
+  }
+  tbody tr:hover {
+    background: #fdf8f5;
+  }
+  .num {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  a {
+    font-weight: 600;
+  }
+}
+
+.thumb {
+  width: 40px;
+  height: 50px;
+  border-radius: 999px 999px 5px 5px;
+  object-fit: cover;
+  background: var(--blush);
+}
+
+.status-PENDING {
+  background: var(--blush);
+  color: var(--burgundy);
+}
+.status-CONFIRMED {
+  background: #e6ecf6;
+  color: #34507f;
+}
+.status-PREPARING,
+.status-OUT_FOR_DELIVERY {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.status-DELIVERED {
+  background: var(--sage-soft);
+  color: var(--sage-ink);
+}
+.status-CANCELLED {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.empty-row {
+  text-align: center;
+  color: var(--ink-soft);
+  padding: 40px 14px !important;
+}

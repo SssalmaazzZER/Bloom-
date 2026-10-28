@@ -1,0 +1,363 @@
+<div class="container">
+  <header class="page-title">
+    <ol class="breadcrumb" aria-label="Fil d'Ariane">
+      <li><a routerLink="/panier">Panier</a></li>
+      <li aria-current="page">Livraison et paiement</li>
+    </ol>
+    <h1>Finaliser la commande</h1>
+  </header>
+
+  @if (loadFailed()) {
+    <app-error-state title="Impossible de préparer votre commande" (retry)="load()" />
+  } @else if (summary() && summary()!.items.length === 0) {
+    <app-empty-state
+      icon="bag"
+      title="Votre panier est vide"
+      message="Ajoutez des fleurs avant de passer commande."
+    >
+      <a class="btn" routerLink="/boutique">Découvrir la boutique</a>
+    </app-empty-state>
+  } @else {
+    @if (serverError(); as e) {
+      <div class="alert" role="alert" tabindex="-1">
+        <strong>Commande non validée.</strong> {{ e.message }}
+        @if (e.code === 'CART_NEEDS_REVIEW' || e.code === 'INSUFFICIENT_STOCK') {
+          <a routerLink="/panier">Revoir mon panier</a>
+        }
+        <br /><span class="small">Votre panier a été conservé.</span>
+      </div>
+    }
+
+    <form class="layout" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="sections">
+        <!-- Contact -->
+        <section class="card" aria-labelledby="contact-title">
+          <h2 id="contact-title">Vos coordonnées</h2>
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="customerName">Nom complet</label>
+              <input
+                id="customerName"
+                class="input"
+                formControlName="customerName"
+                autocomplete="name"
+                [attr.aria-invalid]="!!error('customerName')"
+                aria-describedby="customerName-err"
+              />
+              @if (error('customerName'); as m) {
+                <span id="customerName-err" class="error">{{ m }}</span>
+              }
+            </div>
+            <div class="field">
+              <label for="customerEmail">E-mail</label>
+              <input
+                id="customerEmail"
+                class="input"
+                type="email"
+                formControlName="customerEmail"
+                autocomplete="email"
+                [attr.aria-invalid]="!!error('customerEmail')"
+                aria-describedby="customerEmail-err"
+              />
+              @if (error('customerEmail'); as m) {
+                <span id="customerEmail-err" class="error">{{ m }}</span>
+              }
+            </div>
+            <div class="field">
+              <label for="customerPhone">Téléphone</label>
+              <input
+                id="customerPhone"
+                class="input"
+                type="tel"
+                formControlName="customerPhone"
+                autocomplete="tel"
+                placeholder="06 12 34 56 78"
+                [attr.aria-invalid]="!!error('customerPhone')"
+                aria-describedby="customerPhone-err"
+              />
+              @if (error('customerPhone'); as m) {
+                <span id="customerPhone-err" class="error">{{ m }}</span>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- Delivery address -->
+        <section class="card" aria-labelledby="address-title">
+          <h2 id="address-title">Adresse de livraison</h2>
+          @if (addresses().length) {
+            <div class="field">
+              <label for="saved">Utiliser une adresse enregistrée</label>
+              <select id="saved" class="select" (change)="useAddress($event)">
+                <option value="">Choisir…</option>
+                @for (a of addresses(); track a.id) {
+                  <option [value]="a.id">{{ a.label }}, {{ a.line1 }}, {{ a.city }}</option>
+                }
+              </select>
+            </div>
+          }
+          <label class="check someone">
+            <input type="checkbox" formControlName="forSomeoneElse" />
+            <span>J'offre ces fleurs : elles sont livrées à quelqu'un d'autre</span>
+          </label>
+          @if (forSomeoneElse()) {
+            <div class="form-grid">
+              <div class="field">
+                <label for="recipientName">Nom du destinataire</label>
+                <input
+                  id="recipientName"
+                  class="input"
+                  formControlName="recipientName"
+                  [attr.aria-invalid]="!!error('recipientName')"
+                  aria-describedby="recipientName-err"
+                />
+                @if (error('recipientName'); as m) {
+                  <span id="recipientName-err" class="error">{{ m }}</span>
+                }
+              </div>
+              <div class="field">
+                <label for="recipientPhone">Téléphone du destinataire</label>
+                <input
+                  id="recipientPhone"
+                  class="input"
+                  type="tel"
+                  formControlName="recipientPhone"
+                  [attr.aria-invalid]="!!error('recipientPhone')"
+                  aria-describedby="recipientPhone-err"
+                />
+                <span class="hint">Pour que le coursier puisse le joindre.</span>
+                @if (error('recipientPhone'); as m) {
+                  <span id="recipientPhone-err" class="error">{{ m }}</span>
+                }
+              </div>
+            </div>
+          }
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="addressLine1">Adresse</label>
+              <input
+                id="addressLine1"
+                class="input"
+                formControlName="addressLine1"
+                autocomplete="address-line1"
+                placeholder="N°, rue, quartier"
+                [attr.aria-invalid]="!!error('addressLine1')"
+                aria-describedby="addressLine1-err"
+              />
+              @if (error('addressLine1'); as m) {
+                <span id="addressLine1-err" class="error">{{ m }}</span>
+              }
+            </div>
+            <div class="field span-2">
+              <label for="addressLine2">Complément (facultatif)</label>
+              <input
+                id="addressLine2"
+                class="input"
+                formControlName="addressLine2"
+                autocomplete="address-line2"
+                placeholder="Immeuble, étage, appartement"
+              />
+            </div>
+            <div class="field">
+              <label for="city">Ville</label>
+              <select
+                id="city"
+                class="select"
+                formControlName="city"
+                [attr.aria-invalid]="!!error('city')"
+                aria-describedby="city-err"
+              >
+                <option value="">Choisir une ville…</option>
+                @for (c of delivery()?.cities ?? []; track c) {
+                  <option [value]="c">{{ c }}</option>
+                }
+              </select>
+              @if (error('city'); as m) {
+                <span id="city-err" class="error">{{ m }}</span>
+              }
+            </div>
+            <div class="field">
+              <label for="postalCode">Code postal (facultatif)</label>
+              <input
+                id="postalCode"
+                class="input"
+                formControlName="postalCode"
+                inputmode="numeric"
+                maxlength="5"
+                autocomplete="postal-code"
+                [attr.aria-invalid]="!!error('postalCode')"
+                aria-describedby="postalCode-err"
+              />
+              @if (error('postalCode'); as m) {
+                <span id="postalCode-err" class="error">{{ m }}</span>
+              }
+            </div>
+            <div class="field span-2">
+              <label for="deliveryInstructions">Instructions pour le coursier (facultatif)</label>
+              <textarea
+                id="deliveryInstructions"
+                class="textarea"
+                formControlName="deliveryInstructions"
+                maxlength="500"
+                placeholder="Code d'accès, gardien, sonner deux fois…"
+              ></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Date & slot -->
+        <section class="card" aria-labelledby="when-title">
+          <h2 id="when-title">Date et créneau</h2>
+          @if (delivery(); as d) {
+            <div class="form-grid">
+              <div class="field">
+                <label for="deliveryDate">Date de livraison</label>
+                <input
+                  id="deliveryDate"
+                  class="input"
+                  type="date"
+                  formControlName="deliveryDate"
+                  [min]="d.earliestDate"
+                  [max]="d.latestDate"
+                  [attr.aria-invalid]="!!error('deliveryDate')"
+                  aria-describedby="date-hint"
+                />
+                <span id="date-hint" class="hint"
+                  >Livraison le jour même pour toute commande passée avant
+                  {{ d.sameDayCutoffHour }}h.</span
+                >
+                @if (error('deliveryDate'); as m) {
+                  <span class="error">{{ m }}</span>
+                }
+              </div>
+            </div>
+            <fieldset class="slots">
+              <legend>Créneau</legend>
+              @for (s of availableSlots(); track s.code) {
+                <label class="slot" [class.selected]="form.controls.deliverySlot.value === s.code">
+                  <input type="radio" formControlName="deliverySlot" [value]="s.code" />
+                  <span>{{ s.label }}</span>
+                </label>
+              } @empty {
+                <p class="muted">
+                  Plus de créneau disponible à cette date : choisissez le lendemain.
+                </p>
+              }
+            </fieldset>
+            @if (error('deliverySlot'); as m) {
+              <span class="error">Choisissez un créneau.</span>
+            }
+          } @else {
+            <div class="skeleton" style="height: 120px"></div>
+          }
+        </section>
+
+        <!-- Gift -->
+        <section class="card" aria-labelledby="gift-title">
+          <h2 id="gift-title">Une touche personnelle</h2>
+          <label class="check">
+            <input type="checkbox" formControlName="giftWrapping" />
+            <span
+              >Emballage cadeau premium (papier de soie et boîte)
+              <strong class="price">+ {{ delivery()?.giftWrappingFee ?? 25 | mad }}</strong></span
+            >
+          </label>
+          <div class="field gift-msg">
+            <label for="giftMessage">Message sur la carte (facultatif)</label>
+            <textarea
+              id="giftMessage"
+              class="textarea"
+              formControlName="giftMessage"
+              maxlength="300"
+              placeholder="Écrit à la main par nos fleuristes"
+            ></textarea>
+            <span class="hint">{{ giftMessageLength().length }}/300</span>
+          </div>
+        </section>
+
+        <!-- Payment -->
+        <section class="card" aria-labelledby="pay-title">
+          <h2 id="pay-title">Paiement</h2>
+          <label class="slot selected pay">
+            <input type="radio" checked disabled />
+            <span
+              ><strong>Paiement à la livraison</strong><br />
+              <span class="muted"
+                >En espèces, au coursier, à la réception des fleurs. Aucun paiement n'est demandé
+                maintenant.</span
+              ></span
+            >
+          </label>
+        </section>
+      </div>
+
+      <!-- Summary -->
+      <aside class="summary card" aria-labelledby="sum-title">
+        <h2 id="sum-title">Votre commande</h2>
+        @if (summary(); as c) {
+          <ul class="mini">
+            @for (l of c.items; track l.id) {
+              <li>
+                <img
+                  appImgFallback
+                  [src]="l.imageUrl | imgSize: 160"
+                  alt=""
+                  width="56"
+                  height="70"
+                />
+                <span class="name">{{ l.quantity }} × {{ l.name }}</span>
+                <span class="price">{{ l.lineTotal | mad }}</span>
+              </li>
+            }
+          </ul>
+          <dl>
+            <div>
+              <dt>Sous-total</dt>
+              <dd>{{ c.subtotal | mad }}</dd>
+            </div>
+            <div>
+              <dt>Livraison</dt>
+              <dd>{{ c.deliveryFee > 0 ? (c.deliveryFee | mad) : 'Offerte' }}</dd>
+            </div>
+            @if (c.giftWrappingFee > 0) {
+              <div>
+                <dt>Emballage cadeau</dt>
+                <dd>{{ c.giftWrappingFee | mad }}</dd>
+              </div>
+            }
+            @if (c.discount > 0) {
+              <div>
+                <dt>Remise</dt>
+                <dd>− {{ c.discount | mad }}</dd>
+              </div>
+            }
+            <div class="total">
+              <dt>Total à régler</dt>
+              <dd>{{ c.total | mad }}</dd>
+            </div>
+          </dl>
+          @if (form.controls.deliveryDate.value) {
+            <p class="when muted">
+              <app-icon name="truck" [size]="18" /> Livraison prévue le
+              {{ form.controls.deliveryDate.value | date: 'EEEE d MMMM' }}
+            </p>
+          }
+          <button type="submit" class="btn btn-block" [disabled]="submitting() || !c.checkoutReady">
+            {{ submitting() ? 'Validation…' : 'Confirmer la commande' }}
+          </button>
+          @if (!c.checkoutReady) {
+            <p class="small warn">
+              Certains articles ont changé. <a routerLink="/panier">Revoir le panier</a>
+            </p>
+          }
+          <p class="small muted">
+            En confirmant, vous acceptez nos <a routerLink="/cgv">conditions de vente</a>. Montant
+            recalculé par notre boutique.
+          </p>
+        } @else {
+          <div class="skeleton" style="height: 200px"></div>
+        }
+      </aside>
+    </form>
+  }
+</div>

@@ -1,0 +1,213 @@
+<div class="container">
+  <header class="page-title">
+    <ol class="breadcrumb" aria-label="Fil d'Ariane">
+      <li><a routerLink="/">Accueil</a></li>
+      <li aria-current="page">Boutique</li>
+    </ol>
+    <h1>{{ title() }}</h1>
+    @if (result(); as r) {
+      <p class="muted" role="status">
+        {{ r.totalElements }} création{{ r.totalElements > 1 ? 's' : '' }}
+      </p>
+    }
+  </header>
+
+  <div class="toolbar">
+    <form class="search" role="search" (submit)="search($event)">
+      <label for="catalog-q" class="visually-hidden">Rechercher dans la boutique</label>
+      <app-icon name="search" [size]="20" />
+      <input
+        id="catalog-q"
+        name="q"
+        type="search"
+        class="input"
+        [value]="query().q ?? ''"
+        placeholder="Rechercher une fleur, un bouquet…"
+        maxlength="100"
+      />
+    </form>
+    <button
+      type="button"
+      class="btn btn-soft btn-sm filters-toggle"
+      (click)="filtersOpen.set(true)"
+      aria-controls="filters"
+      [attr.aria-expanded]="filtersOpen()"
+    >
+      <app-icon name="filter" [size]="18" /> Filtres
+    </button>
+    <label class="sort">
+      <span>Trier par</span>
+      <select class="select" (change)="setSort($event)" aria-label="Trier les produits">
+        @for (s of sorts; track s) {
+          <option [value]="s" [selected]="query().sort === s">{{ sortLabels[s] }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (chips().length) {
+    <div class="chips" aria-label="Filtres actifs">
+      @for (c of chips(); track c.param + (c.value ?? '')) {
+        <button
+          type="button"
+          class="chip"
+          (click)="removeChip(c)"
+          [attr.aria-label]="'Retirer le filtre ' + c.label"
+        >
+          {{ c.label }} <app-icon name="close" [size]="14" />
+        </button>
+      }
+      <button type="button" class="link-btn" (click)="clearAll()">Tout effacer</button>
+    </div>
+  }
+
+  <div class="layout">
+    @if (filtersOpen()) {
+      <div class="scrim" (click)="filtersOpen.set(false)" aria-hidden="true"></div>
+    }
+    <aside id="filters" class="filters" [class.open]="filtersOpen()" aria-label="Filtres">
+      <div class="filters-head">
+        <h2>Filtrer</h2>
+        <button
+          type="button"
+          class="icon-btn"
+          (click)="filtersOpen.set(false)"
+          aria-label="Fermer les filtres"
+        >
+          <app-icon name="close" />
+        </button>
+      </div>
+
+      @if (facets(); as f) {
+        <fieldset>
+          <legend>Catégorie</legend>
+          @for (c of f.categories; track c.id) {
+            <label class="check">
+              <input
+                type="checkbox"
+                [checked]="isChecked('categorie', c.slug)"
+                (change)="toggle('categorie', c.slug)"
+              />
+              <span
+                >{{ c.name }} <span class="muted">({{ c.productCount }})</span></span
+              >
+            </label>
+          }
+        </fieldset>
+
+        <fieldset>
+          <legend>Prix (MAD)</legend>
+          <div class="price-row">
+            <label>
+              <span class="visually-hidden">Prix minimum</span>
+              <input
+                class="input"
+                type="number"
+                min="0"
+                step="10"
+                inputmode="numeric"
+                [placeholder]="'Min. ' + f.minPrice"
+                [value]="query().minPrice ?? ''"
+                (change)="setPrice('prixMin', $event)"
+                aria-label="Prix minimum en dirhams"
+              />
+            </label>
+            <span aria-hidden="true">–</span>
+            <label>
+              <span class="visually-hidden">Prix maximum</span>
+              <input
+                class="input"
+                type="number"
+                min="0"
+                step="10"
+                inputmode="numeric"
+                [placeholder]="'Max. ' + f.maxPrice"
+                [value]="query().maxPrice ?? ''"
+                (change)="setPrice('prixMax', $event)"
+                aria-label="Prix maximum en dirhams"
+              />
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Couleur</legend>
+          <div class="swatches">
+            @for (c of f.colors; track c) {
+              <label class="swatch" [class.on]="isChecked('couleur', c)" [title]="colorLabels[c]">
+                <input
+                  type="checkbox"
+                  class="visually-hidden"
+                  [checked]="isChecked('couleur', c)"
+                  (change)="toggle('couleur', c)"
+                />
+                <span class="dot" [style.background]="swatches[c]" aria-hidden="true"></span>
+                <span class="name">{{ colorLabels[c] }}</span>
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Occasion</legend>
+          @for (o of f.occasions; track o.id) {
+            <label class="check">
+              <input
+                type="checkbox"
+                [checked]="isChecked('occasion', o.slug)"
+                (change)="toggle('occasion', o.slug)"
+              />
+              <span>{{ o.name }}</span>
+            </label>
+          }
+        </fieldset>
+
+        <fieldset>
+          <legend>Disponibilité</legend>
+          <label class="check">
+            <input type="checkbox" [checked]="!!query().inStock" (change)="setInStock($event)" />
+            <span>Uniquement les créations disponibles</span>
+          </label>
+        </fieldset>
+      } @else {
+        <div class="skeleton" style="height: 320px"></div>
+      }
+      <button type="button" class="btn btn-block apply" (click)="filtersOpen.set(false)">
+        Voir {{ result()?.totalElements ?? '' }} résultat{{
+          (result()?.totalElements ?? 0) > 1 ? 's' : ''
+        }}
+      </button>
+    </aside>
+
+    <section class="results" aria-labelledby="results-title" [attr.aria-busy]="loading()">
+      <h2 id="results-title" class="visually-hidden">Produits</h2>
+      @if (failed()) {
+        <app-error-state title="La boutique n'a pas pu être chargée" (retry)="retry()" />
+      } @else if (loading() && !result()) {
+        <app-product-grid-skeleton [count]="6" />
+      } @else if (result(); as r) {
+        @if (r.content.length === 0) {
+          <app-empty-state
+            icon="search"
+            title="Aucune création ne correspond"
+            message="Essayez d'élargir votre recherche ou de retirer un filtre."
+          >
+            <button type="button" class="btn" (click)="clearAll()">Effacer les filtres</button>
+            <a class="btn btn-ghost" routerLink="/creer-mon-bouquet">Composer mon propre bouquet</a>
+          </app-empty-state>
+        } @else {
+          <div class="grid" [class.dim]="loading()">
+            @for (p of r.content; track p.id) {
+              <app-product-card [product]="p" />
+            }
+          </div>
+          <app-pagination
+            [page]="r.page"
+            [totalPages]="r.totalPages"
+            (pageChange)="goToPage($event)"
+          />
+        }
+      }
+    </section>
+  </div>
+</div>

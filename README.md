@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Bloomé 🌸 — boutique de fleurs en ligne
 
 Bloomé is a full-stack flower e-commerce application: an editorial French-language storefront
@@ -382,3 +383,6 @@ validation and submission.
 - No password-reset by e-mail (needs an e-mail provider); password change is available in the account.
 - Product images are managed as URLs, not uploads.
 - The interface is French-only; the layout is RTL-ready for a future Arabic translation.
+=======
+# Bloom-
+>>>>>>> ea0bfde4112660be19d104097f8a97890ac1d8c2
